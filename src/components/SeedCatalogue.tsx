@@ -1,5 +1,4 @@
-import { CROPS } from '../game/catalog'
-import { isFocusing } from '../game/rules'
+import { currentSeason, isFocusing } from '../game/rules'
 import { formatNumber } from '../lib/format'
 import { useGameDispatch, useGameState } from '../state/gameContext'
 import { Coins } from './icons/Coins'
@@ -11,12 +10,13 @@ export function SeedCatalogue() {
   const dispatch = useGameDispatch()
   const { garden } = state
   const focusing = isFocusing(state)
+  const season = currentSeason(garden)
 
   return (
     <section className={ledger.section} aria-labelledby="seeds-heading">
       <header className={ledger.heading}>
         <h2 id="seeds-heading" className="label">
-          Seed catalogue
+          Seed catalogue · {season.name}
         </h2>
         <p className={ledger.note}>
           {focusing ? 'The bed is busy until this session ends.' : 'One crop at a time. Unlock them in order.'}
@@ -39,7 +39,7 @@ export function SeedCatalogue() {
           </tr>
         </thead>
         <tbody>
-          {CROPS.map((crop, index) => {
+          {season.crops.map((crop, index) => {
             const unlocked = index < garden.unlockedCount
             const isNext = index === garden.unlockedCount
             const planted = crop.id === garden.planted

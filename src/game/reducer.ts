@@ -1,13 +1,15 @@
-import { CROPS, getCrop, type CropId } from './catalog'
+import { CROPS_PER_SEASON, MAX_YIELD_LEVEL, getCrop, getSeason, type CropId } from './catalog'
 import {
   MINUTE_MS,
-  clampSetting,
+  canStartNewSeason,
+  isFinalCrop,
   isUnlocked,
   nextLockedCrop,
   nextYieldLevel,
+  toSettingValue,
   yieldPerSession,
 } from './rules'
-import type { GameAction, GameState, Settings } from './types'
+import type { GameAction, GameState, GardenState, Settings, Tally } from './types'
 
 export const DEFAULT_SETTINGS: Settings = {
   focusMinutes: 25,
@@ -16,46 +18,62 @@ export const DEFAULT_SETTINGS: Settings = {
   longBreakEvery: 4,
 }
 
-export function sanitizeSettings(settings: Settings): Settings {
+/** Keeps each valid value from `input`, falling back to `fallback` for the rest. */
+export function sanitizeSettings(input: Partial<Record<keyof Settings, unknown>>, fallback: Settings): Settings {
+  const pick = (key: keyof Settings) => toSettingValue(input[key]) ?? fallback[key]
   return {
-    focusMinutes: clampSetting('focusMinutes', settings.focusMinutes),
-    shortBreakMinutes: clampSetting('shortBreakMinutes', settings.shortBreakMinutes),
-    longBreakMinutes: clampSetting('longBreakMinutes', settings.longBreakMinutes),
-    longBreakEvery: clampSetting('longBreakEvery', settings.longBreakEvery),
+    focusMinutes: pick('focusMinutes'),
+    shortBreakMinutes: pick('shortBreakMinutes'),
+    longBreakMinutes: pick('longBreakMinutes'),
+    longBreakEvery: pick('longBreakEvery'),
   }
+}
+
+/** A bare plot at the start of the given season: no coins, first crop only, bare soil. */
+export function freshGarden(seasonsPassed: number, harvested: GardenState['harvested'] = {}): GardenState {
+  return {
+    coins: 0,
+    seasonsPassed,
+    unlockedCount: 1,
+    // Safe: every season has CROPS_PER_SEASON crops.
+    planted: getSeason(seasonsPassed).crops[0]!.id,
+    yieldLevel: 0,
+    finalCropHarvested: false,
+    harvested,
+  }
+}
+
+export const EMPTY_TALLY: Tally = { sessions: 0, focusedMs: 0, crops: 0 }
+
+function addToTally(tally: Tally, focusedMs: number, crops: number): Tally {
+  return { sessions: tally.sessions + 1, focusedMs: tally.focusedMs + focusedMs, crops: tally.crops + crops }
 }
 
 export function createInitialState(): GameState {
   return {
-    garden: {
-      coins: 0,
-      unlockedCount: 1,
-      planted: CROPS[0].id,
-      yieldLevel: 0,
-      harvested: {},
-    },
+    garden: freshGarden(0),
     timer: { phase: 'idle' },
     settings: DEFAULT_SETTINGS,
-    stats: { sessions: 0, focusedMs: 0 },
+    stats: { season: EMPTY_TALLY, total: EMPTY_TALLY },
     lastEvent: null,
   }
 }
 
 /**
- * Completes every countdown that has run out by `now`. Loops because a
- * finished focus session rolls straight into a break, which may also be over
- * if the tab was closed for a while.
+ * Completes the countdown if it has run out by `now`. A finished focus session
+ * stops at breakReady, so at most one countdown is ever settled.
  */
 export function settle(state: GameState, now: number): GameState {
-  let current = state
-  for (;;) {
-    const { timer } = current
-    if (timer.phase === 'idle' || timer.countdown.kind !== 'running') return current
-    if (now < timer.countdown.endsAt) return current
+  const { timer } = state
+  if (timer.phase === 'idle' || timer.phase === 'breakReady' || timer.countdown.kind !== 'running') return state
+  if (now < timer.countdown.endsAt) return state
 
-    const finishedAt = timer.countdown.endsAt
-    current = timer.phase === 'focus' ? completeFocus(current, finishedAt) : completeBreak(current, finishedAt)
-  }
+  const finishedAt = timer.countdown.endsAt
+  return timer.phase === 'focus' ? completeFocus(state, finishedAt) : completeBreak(state, finishedAt)
+}
+
+function breakMs(settings: Settings, long: boolean): number {
+  return (long ? settings.longBreakMinutes : settings.shortBreakMinutes) * MINUTE_MS
 }
 
 function applyHarvest(state: GameState, cropId: CropId, durationMs: number, at: number): GameState {
@@ -69,8 +87,9 @@ function applyHarvest(state: GameState, cropId: CropId, durationMs: number, at: 
       ...garden,
       coins: garden.coins + coins,
       harvested: { ...garden.harvested, [cropId]: (garden.harvested[cropId] ?? 0) + amount },
+      finalCropHarvested: garden.finalCropHarvested || isFinalCrop(garden, cropId),
     },
-    stats: { sessions: stats.sessions + 1, focusedMs: stats.focusedMs + durationMs },
+    stats: { season: addToTally(stats.season, durationMs, amount), total: addToTally(stats.total, durationMs, amount) },
     lastEvent: { kind: 'harvest', at, cropId, amount, coins },
   }
 }
@@ -81,18 +100,9 @@ function completeFocus(state: GameState, finishedAt: number): GameState {
 
   const harvested = applyHarvest(state, timer.cropId, timer.durationMs, finishedAt)
   const { settings, stats } = harvested
-  const long = stats.sessions % settings.longBreakEvery === 0
-  const breakMs = (long ? settings.longBreakMinutes : settings.shortBreakMinutes) * MINUTE_MS
+  const long = stats.total.sessions % settings.longBreakEvery === 0
 
-  return {
-    ...harvested,
-    timer: {
-      phase: 'break',
-      long,
-      durationMs: breakMs,
-      countdown: { kind: 'running', endsAt: finishedAt + breakMs },
-    },
-  }
+  return { ...harvested, timer: { phase: 'breakReady', long } }
 }
 
 function completeBreak(state: GameState, finishedAt: number): GameState {
@@ -105,7 +115,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return settle(state, action.now)
 
     case 'startFocus': {
-      if (state.timer.phase !== 'idle') return state
+      if (state.timer.phase !== 'idle' && state.timer.phase !== 'breakReady') return state
       const durationMs = state.settings.focusMinutes * MINUTE_MS
       return {
         ...state,
@@ -118,10 +128,27 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
     }
 
+    case 'startBreak': {
+      const { timer } = state
+      if (timer.phase !== 'breakReady') return state
+      const durationMs = breakMs(state.settings, timer.long)
+      return {
+        ...state,
+        timer: {
+          phase: 'break',
+          long: timer.long,
+          durationMs,
+          countdown: { kind: 'running', endsAt: action.now + durationMs },
+        },
+      }
+    }
+
     case 'pause': {
       const settled = settle(state, action.now)
       const { timer } = settled
-      if (timer.phase === 'idle' || timer.countdown.kind !== 'running') return settled
+      if (timer.phase === 'idle' || timer.phase === 'breakReady' || timer.countdown.kind !== 'running') {
+        return settled
+      }
       return {
         ...settled,
         timer: { ...timer, countdown: { kind: 'paused', remainingMs: timer.countdown.endsAt - action.now } },
@@ -130,7 +157,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'resume': {
       const { timer } = state
-      if (timer.phase === 'idle' || timer.countdown.kind !== 'paused') return state
+      if (timer.phase === 'idle' || timer.phase === 'breakReady' || timer.countdown.kind !== 'paused') return state
       return {
         ...state,
         timer: { ...timer, countdown: { kind: 'running', endsAt: action.now + timer.countdown.remainingMs } },
@@ -141,6 +168,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       // The countdown may have ended without a tick (e.g. while a confirm dialog
       // blocked the page). Pay that out and leave the next phase alone: the user
       // meant to stop the phase they were looking at, and it's already over.
+      // From breakReady, stop skips the break that hasn't started.
       const settled = settle(state, action.now)
       if (settled.timer.phase !== state.timer.phase) return settled
       return settled.timer.phase === 'idle' ? settled : { ...settled, timer: { phase: 'idle' } }
@@ -180,12 +208,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
     }
 
+    case 'newSeason': {
+      const { garden } = state
+      if (state.timer.phase === 'focus' || !canStartNewSeason(garden)) return state
+      return {
+        ...state,
+        garden: freshGarden(garden.seasonsPassed + 1, garden.harvested),
+        stats: { ...state.stats, season: EMPTY_TALLY },
+      }
+    }
+
     case 'updateSettings':
-      return { ...state, settings: sanitizeSettings({ ...state.settings, ...action.settings }) }
+      return { ...state, settings: sanitizeSettings(action.settings, state.settings) }
 
     case 'debug/finish': {
       const { timer } = state
-      if (timer.phase === 'idle') return state
+      if (timer.phase === 'idle' || timer.phase === 'breakReady') return state
       return settle({ ...state, timer: { ...timer, countdown: { kind: 'running', endsAt: action.now } } }, action.now)
     }
 
@@ -196,6 +234,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         next = applyHarvest(next, next.garden.planted, next.settings.focusMinutes * MINUTE_MS, action.now)
       }
       return next
+    }
+
+    case 'debug/ownAll': {
+      if (state.timer.phase === 'focus') return state
+      return {
+        ...state,
+        garden: { ...state.garden, unlockedCount: CROPS_PER_SEASON, yieldLevel: MAX_YIELD_LEVEL },
+      }
     }
 
     case 'debug/reset':

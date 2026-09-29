@@ -1,18 +1,20 @@
 import { countCrop, getCrop } from '../game/catalog'
 import { harvestValue, yieldPerSession } from '../game/rules'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import { useFavicon } from '../hooks/useFavicon'
 import { usePomodoro } from '../hooks/usePomodoro'
+import { useUnseen } from '../hooks/useUnseen'
 import { formatClock } from '../lib/format'
 import { useGameState } from '../state/gameContext'
 import { Clock } from './Clock'
 import { HarvestNotice } from './HarvestNotice'
 import { Coins } from './icons/Coins'
 import { CropIcon } from './icons/CropIcon'
-import { TimerSettings } from './TimerSettings'
+import { SessionStats } from './SessionStats'
 import styles from './TimerPanel.module.css'
 
 export function TimerPanel() {
-  const { garden, timer, stats } = useGameState()
+  const { garden, timer, stats, lastEvent } = useGameState()
   const pomodoro = usePomodoro()
   const { phase, running, paused } = pomodoro
 
@@ -22,10 +24,25 @@ export function TimerPanel() {
   const clock = formatClock(pomodoro.remainingMs)
   const progress = 1 - pomodoro.remainingMs / pomodoro.totalMs
 
-  const phaseName = phase === 'idle' ? 'Ready' : phase === 'focus' ? 'Focus' : pomodoro.isLongBreak ? 'Long break' : 'Short break'
+  const breakName = pomodoro.isLongBreak ? 'Long break' : 'Short break'
+  const phaseName = {
+    idle: 'Ready',
+    focus: 'Focus',
+    breakReady: 'Session complete',
+    break: breakName,
+  }[phase]
   const phaseLabel = paused ? `${phaseName}, paused` : phaseName
 
-  useDocumentTitle(phase === 'idle' ? 'Focus Sprout' : `${clock} ${phase === 'focus' ? 'focus' : 'break'} · Focus Sprout`)
+  // Flag anything that happened while the user was looking elsewhere, until they come back.
+  const unseen = useUnseen(lastEvent)
+  const titles = {
+    idle: unseen && lastEvent?.kind === 'break-over' ? "Break's over" : '',
+    focus: `${clock} focus`,
+    breakReady: '✓ Session done',
+    break: `${clock} break`,
+  }
+  useDocumentTitle(titles[phase] ? `${titles[phase]} · Focus Sprout` : 'Focus Sprout')
+  useFavicon(phase === 'breakReady' || unseen)
 
   const giveUp = () => {
     if (window.confirm(`Give up this session? You won't harvest any ${crop.many}.`)) {
@@ -53,7 +70,8 @@ export function TimerPanel() {
       <div className={styles.clockBlock} data-phase={phase}>
         <p className={styles.phase}>
           <span>{phaseLabel}</span>
-          {phase !== 'break' && <span>Session no. {stats.sessions + 1}</span>}
+          {(phase === 'idle' || phase === 'focus') && <span>Session no. {stats.total.sessions + 1}</span>}
+          {phase === 'breakReady' && <span>{breakName} next</span>}
         </p>
         <Clock text={clock} />
         <div
@@ -84,6 +102,16 @@ export function TimerPanel() {
             Resume
           </button>
         )}
+        {phase === 'breakReady' && (
+          <>
+            <button type="button" className="button primary" onClick={pomodoro.startBreak}>
+              Start break
+            </button>
+            <button type="button" className="button" onClick={pomodoro.stop}>
+              Skip break
+            </button>
+          </>
+        )}
         {phase === 'focus' && (
           <button type="button" className="button" onClick={giveUp}>
             Give up
@@ -97,7 +125,7 @@ export function TimerPanel() {
       </div>
 
       <HarvestNotice />
-      <TimerSettings />
+      <SessionStats />
     </section>
   )
 }

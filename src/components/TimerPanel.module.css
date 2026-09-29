@@ -44,7 +44,8 @@
   color: var(--ink-soft);
 }
 
-.clockBlock[data-phase='break'] {
+.clockBlock[data-phase='break'],
+.clockBlock[data-phase='breakReady'] {
   color: var(--leaf);
 }
 

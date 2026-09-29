@@ -40,6 +40,12 @@
   font-size: 0.95rem;
 }
 
+.status {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.75rem;
+}
+
 .purse {
   margin: 0;
   display: flex;
@@ -54,6 +60,13 @@
   font-variant-numeric: tabular-nums lining-nums;
 }
 
+.season {
+  margin-top: 0.3rem;
+  font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+  font-style: italic;
+  white-space: nowrap;
+}
+
 @media (max-width: 30rem) {
   .brand {
     --mark-height: calc(var(--title-size) * 1.15);
@@ -61,5 +74,19 @@
 
   .tagline {
     display: none;
+  }
+
+  .status {
+    flex-direction: column-reverse;
+    gap: 0.35rem;
+  }
+
+  .seasonLabel {
+    display: none;
+  }
+
+  .season {
+    margin-top: 0;
+    font-size: 0.95rem;
   }
 }

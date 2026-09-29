@@ -1,5 +1,5 @@
 .details {
-  margin-top: 1.5rem;
+  margin: 0;
 }
 
 .summary {
@@ -28,19 +28,55 @@
   font-size: 0.9rem;
 }
 
-.field select {
+.inputRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.inputRow:focus-within {
+  border-bottom-color: var(--accent, var(--ink));
+}
+
+.inputRow input {
+  width: 2.2em;
   font: inherit;
   font-size: 1rem;
+  font-variant-numeric: tabular-nums lining-nums;
   color: var(--ink);
   background: transparent;
   border: 0;
-  border-bottom: 1px solid var(--ink);
   border-radius: 0;
   padding: 0.2rem 0;
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 
-.field select option {
-  background: var(--paper);
+.inputRow input::-webkit-inner-spin-button,
+.inputRow input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.inputRow input:focus {
+  outline: none;
+}
+
+.unit {
+  color: var(--ink-soft);
+}
+
+.reset {
+  margin-left: 0.5rem;
+  padding: 0;
+  font: inherit;
+  font-style: normal;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .hint {

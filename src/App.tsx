@@ -1,16 +1,17 @@
 import { DebugPanel } from './components/DebugPanel'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
+import { SeasonPanel } from './components/SeasonPanel'
 import { SeedCatalogue } from './components/SeedCatalogue'
 import { TimerPanel } from './components/TimerPanel'
 import { YieldUpgrades } from './components/YieldUpgrades'
-import { useChime } from './hooks/useChime'
+import { useTimerAlerts } from './hooks/useTimerAlerts'
 import { DEBUG_ENABLED } from './lib/debug'
 import { useGameState } from './state/gameContext'
 import styles from './App.module.css'
 
 export default function App() {
-  useChime(useGameState().lastEvent)
+  useTimerAlerts(useGameState().lastEvent)
 
   return (
     <div className={styles.page}>
@@ -20,6 +21,7 @@ export default function App() {
           <TimerPanel />
         </div>
         <div className={styles.side}>
+          <SeasonPanel />
           <SeedCatalogue />
           <YieldUpgrades />
         </div>

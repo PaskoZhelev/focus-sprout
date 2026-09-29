@@ -1,6 +1,7 @@
 .clock {
   margin: 0;
-  font-size: clamp(4.5rem, 15vw, 7.5rem);
+  font-size: calc(clamp(4.5rem, 15vw, 7.5rem) * var(--clock-scale, 1));
+  white-space: nowrap;
   font-weight: 400;
   line-height: 1;
   font-variant-numeric: lining-nums;

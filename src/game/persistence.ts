@@ -1,6 +1,6 @@
-import { CROPS, MAX_YIELD_LEVEL, isCropId, type CropId } from './catalog'
+import { CROPS_PER_SEASON, MAX_YIELD_LEVEL, getSeason, isCropId, type CropId } from './catalog'
 import { DEFAULT_SETTINGS, createInitialState, sanitizeSettings } from './reducer'
-import type { Countdown, GameState, GardenState, Stats, TimerEvent, TimerState } from './types'
+import type { Countdown, GameState, GardenState, Stats, Tally, TimerEvent, TimerState } from './types'
 
 const STORAGE_KEY = 'focus-sprout'
 const SAVE_VERSION = 1
@@ -41,14 +41,7 @@ export function reviveState(data: unknown): GameState | null {
   const garden = reviveGarden(data.garden)
   if (!garden) return null
 
-  const settings = isRecord(data.settings)
-    ? sanitizeSettings({
-        focusMinutes: numberOr(data.settings.focusMinutes, DEFAULT_SETTINGS.focusMinutes),
-        shortBreakMinutes: numberOr(data.settings.shortBreakMinutes, DEFAULT_SETTINGS.shortBreakMinutes),
-        longBreakMinutes: numberOr(data.settings.longBreakMinutes, DEFAULT_SETTINGS.longBreakMinutes),
-        longBreakEvery: numberOr(data.settings.longBreakEvery, DEFAULT_SETTINGS.longBreakEvery),
-      })
-    : DEFAULT_SETTINGS
+  const settings = isRecord(data.settings) ? sanitizeSettings(data.settings, DEFAULT_SETTINGS) : DEFAULT_SETTINGS
 
   return {
     garden,
@@ -61,11 +54,14 @@ export function reviveState(data: unknown): GameState | null {
 
 function reviveGarden(data: unknown): GardenState | null {
   if (!isRecord(data)) return null
-  const { coins, unlockedCount, planted, yieldLevel, harvested } = data
+  const { coins, seasonsPassed, unlockedCount, planted, yieldLevel, finalCropHarvested, harvested } = data
   if (!isNonNegative(coins)) return null
-  if (!isIntInRange(unlockedCount, 1, CROPS.length)) return null
+  if (!isIntInRange(seasonsPassed, 0, Number.MAX_SAFE_INTEGER)) return null
+  if (!isIntInRange(unlockedCount, 1, CROPS_PER_SEASON)) return null
   if (!isIntInRange(yieldLevel, 0, MAX_YIELD_LEVEL)) return null
-  if (!isCropId(planted) || CROPS.findIndex((crop) => crop.id === planted) >= unlockedCount) return null
+  if (!isCropId(planted)) return null
+  const plantedIndex = getSeason(seasonsPassed).crops.findIndex((crop) => crop.id === planted)
+  if (plantedIndex === -1 || plantedIndex >= unlockedCount) return null
 
   const harvestedCounts: Partial<Record<CropId, number>> = {}
   if (isRecord(harvested)) {
@@ -74,12 +70,22 @@ function reviveGarden(data: unknown): GardenState | null {
     }
   }
 
-  return { coins, unlockedCount, planted, yieldLevel, harvested: harvestedCounts }
+  return {
+    coins,
+    seasonsPassed,
+    unlockedCount,
+    planted,
+    yieldLevel,
+    // Only possible once the last crop is unlocked.
+    finalCropHarvested: finalCropHarvested === true && unlockedCount === CROPS_PER_SEASON,
+    harvested: harvestedCounts,
+  }
 }
 
 function reviveTimer(data: unknown, garden: GardenState): TimerState | null {
   if (!isRecord(data)) return null
   if (data.phase === 'idle') return { phase: 'idle' }
+  if (data.phase === 'breakReady') return { phase: 'breakReady', long: data.long === true }
 
   const countdown = reviveCountdown(data.countdown)
   if (!countdown || !isNonNegative(data.durationMs)) return null
@@ -104,11 +110,14 @@ function reviveCountdown(data: unknown): Countdown | null {
 }
 
 function reviveStats(data: unknown): Stats {
-  if (!isRecord(data)) return { sessions: 0, focusedMs: 0 }
-  return {
-    sessions: isNonNegative(data.sessions) ? data.sessions : 0,
-    focusedMs: isNonNegative(data.focusedMs) ? data.focusedMs : 0,
-  }
+  const record = isRecord(data) ? data : {}
+  return { season: reviveTally(record.season), total: reviveTally(record.total) }
+}
+
+function reviveTally(data: unknown): Tally {
+  const record = isRecord(data) ? data : {}
+  const count = (value: unknown) => (isNonNegative(value) ? value : 0)
+  return { sessions: count(record.sessions), focusedMs: count(record.focusedMs), crops: count(record.crops) }
 }
 
 function reviveEvent(data: unknown): TimerEvent | null {
@@ -130,8 +139,4 @@ function isNonNegative(value: unknown): value is number {
 
 function isIntInRange(value: unknown, min: number, max: number): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max
-}
-
-function numberOr(value: unknown, fallback: number): number {
-  return typeof value === 'number' ? value : fallback
 }

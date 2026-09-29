@@ -1,0 +1,41 @@
+.stats {
+  margin-top: 1.5rem;
+  border-collapse: collapse;
+}
+
+.stats th,
+.stats td {
+  padding: 0.2rem 1.5rem 0.2rem 0;
+  text-align: left;
+  font-weight: normal;
+}
+
+.stats thead th {
+  padding-bottom: 0.3rem;
+}
+
+.stats tbody th,
+.stats tbody td {
+  white-space: nowrap;
+}
+
+.stats tbody th {
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.stats tbody td {
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (max-width: 30rem) {
+  .stats th,
+  .stats td {
+    padding-right: 0.6rem;
+  }
+
+  .stats tbody td {
+    font-size: 0.95rem;
+  }
+}

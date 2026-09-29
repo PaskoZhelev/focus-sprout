@@ -1,4 +1,4 @@
-import { harvestValue, nextLockedCrop, nextYieldLevel } from '../game/rules'
+import { canStartNewSeason, harvestValue, nextLockedCrop, nextYieldLevel, upcomingSeason } from '../game/rules'
 import { useGameDispatch, useGameState } from '../state/gameContext'
 import styles from './DebugPanel.module.css'
 
@@ -18,7 +18,7 @@ export function DebugPanel() {
 
   const harvest = (sessions: number) => dispatch({ type: 'debug/harvest', sessions, now: Date.now() })
   const reset = () => {
-    if (window.confirm('Wipe all coins, crops and upgrades?')) dispatch({ type: 'debug/reset' })
+    if (window.confirm('Wipe all coins, crops, upgrades and seasons?')) dispatch({ type: 'debug/reset' })
   }
 
   return (
@@ -28,7 +28,7 @@ export function DebugPanel() {
         <button
           type="button"
           className="button small"
-          disabled={timer.phase === 'idle'}
+          disabled={timer.phase === 'idle' || timer.phase === 'breakReady'}
           onClick={() => dispatch({ type: 'debug/finish', now: Date.now() })}
         >
           Finish countdown
@@ -39,6 +39,14 @@ export function DebugPanel() {
         <button type="button" className="button small" disabled={focusing} onClick={() => harvest(10)}>
           +10 sessions
         </button>
+        <button
+          type="button"
+          className="button small"
+          disabled={focusing || (!crop && !tool)}
+          onClick={() => dispatch({ type: 'debug/ownAll' })}
+        >
+          Own everything
+        </button>
         <button type="button" className="button small" onClick={reset}>
           Reset progress
         </button>
@@ -47,6 +55,7 @@ export function DebugPanel() {
         {perSession} coins per session.{' '}
         {crop ? `${crop.name}: ${sessionsUntil(crop.price, garden.coins, perSession)}.` : 'All crops unlocked.'}{' '}
         {tool ? `${tool.name}: ${sessionsUntil(tool.cost, garden.coins, perSession)}.` : 'All tools owned.'}
+        {canStartNewSeason(garden) && ` ${upcomingSeason(garden).name} can start.`}
       </p>
     </aside>
   )
