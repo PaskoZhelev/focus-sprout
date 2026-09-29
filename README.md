@@ -12,6 +12,8 @@ in it, a timer, and two price lists.
   <img src="screenshots/screenshot2.jpg" alt="Focus Sprout in the dark theme: spring onions growing in spring, the timer at 25:00, stats, and the spring seed catalogue" width="49%">
 </p>
 
+URL: https://PaskoZhelev.github.io/focus-sprout/
+
 ## The game
 
 ### The loop
