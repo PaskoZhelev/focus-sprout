@@ -1,0 +1,73 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.planted {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.6rem;
+}
+
+.icon {
+  width: 3.75rem;
+  height: 3.75rem;
+  flex: none;
+}
+
+.crop {
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+
+.latin {
+  font-size: 1rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.yield {
+  margin: 0.25rem 0 0;
+  color: var(--ink-soft);
+}
+
+.clockBlock {
+  margin-block: 2.25rem 1.5rem;
+}
+
+.phase {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0.25rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.clockBlock[data-phase='break'] {
+  color: var(--leaf);
+}
+
+.track {
+  height: 3px;
+  margin-top: 0.75rem;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  transition: transform 0.25s linear;
+}
+
+.clockBlock[data-phase='break'] .fill {
+  background: var(--leaf);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

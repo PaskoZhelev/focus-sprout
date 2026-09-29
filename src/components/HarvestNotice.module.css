@@ -1,0 +1,19 @@
+.notice {
+  min-height: 3em;
+  margin: 1.5rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px dotted var(--rule-strong);
+  font-style: italic;
+}
+
+.notice:empty {
+  border-top-color: transparent;
+}
+
+.notice time {
+  margin-right: 0.6em;
+  font-style: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}

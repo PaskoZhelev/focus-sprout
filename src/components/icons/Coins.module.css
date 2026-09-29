@@ -1,0 +1,13 @@
+.coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.icon {
+  width: 0.95em;
+  height: 0.95em;
+  flex: none;
+}

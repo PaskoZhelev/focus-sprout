@@ -1,0 +1,129 @@
+.section + .section {
+  margin-top: 2.75rem;
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.note {
+  margin: 0;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 0.5rem 0.5rem 0.3rem;
+  text-align: left;
+  font-weight: normal;
+  font-size: 0.8rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.table td {
+  padding: 0.6rem 0.5rem;
+  border-top: 1px dotted var(--rule-strong);
+  vertical-align: middle;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: 0.6rem;
+}
+
+.num {
+  width: 2.5rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
+}
+
+.table th.figure {
+  text-align: right;
+}
+
+.action {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+}
+
+.name {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.sub {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.tag {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.price {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.current td {
+  background: var(--paper-deep);
+}
+
+.current td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.muted .name,
+.muted .num,
+.muted .figure,
+.muted .price {
+  color: var(--ink-faint);
+}
+
+.muted .icon {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+/* Coins keep their colour so they stay recognisable as a price. */
+.muted .figure svg,
+.muted .price svg {
+  opacity: 0.6;
+}

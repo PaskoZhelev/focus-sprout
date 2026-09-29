@@ -1,0 +1,65 @@
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 2rem 1.25rem;
+  border-bottom: 2px solid var(--ink);
+}
+
+.brand {
+  --title-size: clamp(1.75rem, 4vw, 2.4rem);
+  --mark-height: calc(var(--title-size) * 1.55);
+  display: flex;
+  /* Rests the mark's bottom edge — the soil line — on the tagline's baseline.
+     flex-end is the fallback where `last baseline` is unsupported. */
+  align-items: flex-end;
+  align-items: last baseline;
+  gap: 0.7rem;
+}
+
+.mark {
+  width: auto;
+  height: var(--mark-height);
+  color: var(--leaf);
+  flex: none;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--title-size);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin: 0.35rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+.purse {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+}
+
+.coins {
+  margin-top: 0.3rem;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@media (max-width: 30rem) {
+  .brand {
+    --mark-height: calc(var(--title-size) * 1.15);
+  }
+
+  .tagline {
+    display: none;
+  }
+}

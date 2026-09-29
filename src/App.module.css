@@ -1,0 +1,37 @@
+.page {
+  --gutter: clamp(2rem, 4vw, 3.5rem);
+  max-width: 68rem;
+  margin: 0 auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  padding-top: 2rem;
+}
+
+.primary {
+  padding-right: var(--gutter);
+}
+
+.side {
+  padding-left: var(--gutter);
+  border-left: 1px solid var(--rule);
+}
+
+@media (max-width: 52rem) {
+  .main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .primary {
+    padding-right: 0;
+  }
+
+  .side {
+    margin-top: 3rem;
+    padding-left: 0;
+    border-left: 0;
+  }
+}
