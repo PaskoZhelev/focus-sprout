@@ -1,13 +1,13 @@
 /** Price and value of one rung on the unlock ladder. Every season climbs the same ladder. */
 export const CROP_TIERS = [
   { price: 0, value: 5 },
-  { price: 25, value: 8 },
-  { price: 100, value: 13 },
-  { price: 300, value: 21 },
-  { price: 800, value: 34 },
-  { price: 2000, value: 55 },
+  { price: 30, value: 8 },
+  { price: 150, value: 13 },
+  { price: 400, value: 21 },
+  { price: 1000, value: 34 },
+  { price: 2200, value: 55 },
   { price: 5000, value: 89 },
-  { price: 12000, value: 144 },
+  { price: 9000, value: 144 },
 ] as const
 
 export const CROPS_PER_SEASON = CROP_TIERS.length
@@ -137,13 +137,13 @@ export interface YieldLevel {
 
 export const YIELD_LEVELS = [
   { name: 'Bare soil', yield: 1, cost: 0 },
-  { name: 'Watering can', yield: 2, cost: 40 },
-  { name: 'Compost heap', yield: 3, cost: 150 },
-  { name: 'Raised beds', yield: 4, cost: 450 },
-  { name: 'Drip irrigation', yield: 5, cost: 1200 },
-  { name: 'Cold frame', yield: 6, cost: 3000 },
-  { name: 'Polytunnel', yield: 7, cost: 7000 },
-  { name: 'Greenhouse', yield: 8, cost: 15000 },
+  { name: 'Watering can', yield: 2, cost: 10 },
+  { name: 'Compost heap', yield: 3, cost: 30 },
+  { name: 'Raised beds', yield: 5, cost: 70 },
+  { name: 'Drip irrigation', yield: 7, cost: 150 },
+  { name: 'Cold frame', yield: 10, cost: 300 },
+  { name: 'Polytunnel', yield: 13, cost: 600 },
+  { name: 'Greenhouse', yield: 16, cost: 800 },
 ] as const satisfies readonly YieldLevel[]
 
 export const MAX_YIELD_LEVEL = YIELD_LEVELS.length - 1

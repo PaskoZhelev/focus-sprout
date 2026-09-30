@@ -39,33 +39,36 @@ Every season has its own eight crops, but they all sit on the same price ladder:
 | No. | Unlock price | Value per crop | Spring       | Summer       | Autumn   | Winter          |
 | --: | -----------: | -------------: | ------------ | ------------ | -------- | --------------- |
 |  01 |         free |              5 | Radish       | Courgette    | Beetroot | Kale            |
-|  02 |           25 |              8 | Lettuce      | Green bean   | Carrot   | Leek            |
-|  03 |          100 |             13 | Spring onion | Cucumber     | Potato   | Parsnip         |
-|  04 |          300 |             21 | Pea          | Tomato       | Apple    | Brussels sprout |
-|  05 |          800 |             34 | Broad bean   | Sweetcorn    | Pear     | Red cabbage     |
-|  06 |        2,000 |             55 | Rhubarb      | Sweet pepper | Pumpkin  | Celeriac        |
+|  02 |           30 |              8 | Lettuce      | Green bean   | Carrot   | Leek            |
+|  03 |          150 |             13 | Spring onion | Cucumber     | Potato   | Parsnip         |
+|  04 |          400 |             21 | Pea          | Tomato       | Apple    | Brussels sprout |
+|  05 |        1,000 |             34 | Broad bean   | Sweetcorn    | Pear     | Red cabbage     |
+|  06 |        2,200 |             55 | Rhubarb      | Sweet pepper | Pumpkin  | Celeriac        |
 |  07 |        5,000 |             89 | Artichoke    | Strawberry   | Grape    | Chicory         |
-|  08 |       12,000 |            144 | Asparagus    | Melon        | Saffron  | Black truffle   |
+|  08 |        9,000 |            144 | Asparagus    | Melon        | Saffron  | Black truffle   |
 
 ### Soil & tools (yield upgrades)
 
 One upgrade track sets how many crops a single session produces. It applies to
 whatever is planted.
 
-| Level | Improvement     | Crops per session |   Cost |
-| ----: | --------------- | ----------------: | -----: |
-|     1 | Bare soil       |                 1 |      — |
-|     2 | Watering can    |                 2 |     40 |
-|     3 | Compost heap    |                 3 |    150 |
-|     4 | Raised beds     |                 4 |    450 |
-|     5 | Drip irrigation |                 5 |  1,200 |
-|     6 | Cold frame      |                 6 |  3,000 |
-|     7 | Polytunnel      |                 7 |  7,000 |
-|     8 | Greenhouse      |                 8 | 15,000 |
+| Level | Improvement     | Crops per session | Cost |
+| ----: | --------------- | ----------------: | ---: |
+|     1 | Bare soil       |                 1 |    — |
+|     2 | Watering can    |                 2 |   10 |
+|     3 | Compost heap    |                 3 |   30 |
+|     4 | Raised beds     |                 5 |   70 |
+|     5 | Drip irrigation |                 7 |  150 |
+|     6 | Cold frame      |                10 |  300 |
+|     7 | Polytunnel      |                13 |  600 |
+|     8 | Greenhouse      |                16 |  800 |
 
-A player who always buys the best-value upgrade gets something new every 5 to
-20 sessions. They own everything in a season after about 140 sessions, which is
-roughly 58 hours of focused work.
+Tools are cheap next to crops, and every one of them shortens the season. A
+simple rule that comes within one session of the fastest route: buy whichever is
+cheaper, the next tool or the next crop.
+
+Played that way you get something new every 2 to 6 sessions and own everything
+in a season after about 49 sessions, which is roughly 20 hours of focused work.
 
 ### Seasons
 

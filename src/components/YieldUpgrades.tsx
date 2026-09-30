@@ -19,7 +19,7 @@ export function YieldUpgrades() {
         <p className={ledger.note}>
           {focusing
             ? 'Tools are in use until this session ends.'
-            : 'Each step adds one crop to every harvest, whatever is growing.'}
+            : 'Each step grows more crops per harvest, whatever is growing.'}
         </p>
       </header>
 
